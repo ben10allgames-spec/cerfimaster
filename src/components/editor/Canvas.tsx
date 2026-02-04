@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Canvas as FabricCanvas, IText, Image as FabricImage, Circle, Rect, Line, FabricObject } from 'fabric';
+import * as fabric from 'fabric';
 import { useEditor } from '@/contexts/EditorContext';
 import { CertificateElement } from '@/types/certificate';
 
 export function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<FabricCanvas | null>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   
@@ -21,7 +21,7 @@ export function Canvas() {
   useEffect(() => {
     if (!canvasRef.current || fabricRef.current) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
+    const canvas = new fabric.Canvas(canvasRef.current, {
       width: template.width,
       height: template.height,
       backgroundColor: template.backgroundColor,
@@ -71,7 +71,7 @@ export function Canvas() {
           };
           
           if (obj.type === 'i-text' || obj.type === 'text') {
-            const textObj = obj as IText;
+            const textObj = obj as fabric.IText;
             updates.width = textObj.width;
             updates.fontSize = textObj.fontSize;
           } else {
@@ -85,7 +85,7 @@ export function Canvas() {
     });
 
     canvas.on('text:changed', (e) => {
-      const obj = e.target as IText;
+      const obj = e.target as fabric.IText;
       if (obj) {
         const data = (obj as any).data;
         if (data?.id) {
@@ -109,7 +109,7 @@ export function Canvas() {
     canvas.backgroundColor = template.backgroundColor;
 
     if (template.backgroundImage) {
-      FabricImage.fromURL(template.backgroundImage).then((img) => {
+      fabric.FabricImage.fromURL(template.backgroundImage).then((img) => {
         img.scaleToWidth(template.width);
         img.scaleToHeight(template.height);
         canvas.backgroundImage = img;
@@ -121,12 +121,12 @@ export function Canvas() {
     const sortedElements = [...template.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 
     sortedElements.forEach((element) => {
-      let fabricObj: FabricObject | null = null;
+      let fabricObj: fabric.FabricObject | null = null;
 
       switch (element.type) {
         case 'text':
         case 'placeholder':
-          fabricObj = new IText(element.text || '', {
+          fabricObj = new fabric.IText(element.text || '', {
             left: element.x,
             top: element.y,
             fontFamily: element.fontFamily || 'Inter',
@@ -146,7 +146,7 @@ export function Canvas() {
 
         case 'image':
           if (element.src) {
-            FabricImage.fromURL(element.src, { crossOrigin: 'anonymous' }).then((img) => {
+            fabric.FabricImage.fromURL(element.src, { crossOrigin: 'anonymous' }).then((img) => {
               img.set({
                 left: element.x,
                 top: element.y,
@@ -164,7 +164,7 @@ export function Canvas() {
         case 'shape':
           if (element.shapeType === 'circle') {
             const radius = Math.min(element.width || 100, element.height || 100) / 2;
-            fabricObj = new Circle({
+            fabricObj = new fabric.Circle({
               left: element.x,
               top: element.y,
               radius,
@@ -175,7 +175,7 @@ export function Canvas() {
               opacity: element.opacity ?? 1,
             });
           } else {
-            fabricObj = new Rect({
+            fabricObj = new fabric.Rect({
               left: element.x,
               top: element.y,
               width: element.width || 100,
@@ -194,7 +194,7 @@ export function Canvas() {
           break;
 
         case 'line':
-          fabricObj = new Line([0, 0, element.width || 200, 0], {
+          fabricObj = new fabric.Line([0, 0, element.width || 200, 0], {
             left: element.x,
             top: element.y,
             stroke: element.fill || '#000000',
