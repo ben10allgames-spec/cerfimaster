@@ -1,11 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as fabric from 'fabric';
+import fabricModule from 'fabric';
 import { useEditor } from '@/contexts/EditorContext';
 import { CertificateElement } from '@/types/certificate';
 
+// Vite wraps Fabric v5 (UMD) as a default export that looks like: { fabric: <actualFabric> }
+// so we normalize it here.
+const fabric = ((fabricModule as any)?.fabric ?? fabricModule) as any;
+
+function loadFabricImage(url: string, options?: Record<string, unknown>) {
+  return new Promise<any>((resolve, reject) => {
+    try {
+      const ImageCtor = fabric?.Image ?? fabric?.FabricImage;
+      if (!ImageCtor?.fromURL) {
+        reject(new Error('Fabric Image.fromURL is not available'));
+        return;
+      }
+      ImageCtor.fromURL(url, (img: any) => resolve(img), options);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 export function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<fabric.Canvas | null>(null);
+  const fabricRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   
@@ -71,7 +90,7 @@ export function Canvas() {
           };
           
           if (obj.type === 'i-text' || obj.type === 'text') {
-            const textObj = obj as fabric.IText;
+            const textObj = obj as any;
             updates.width = textObj.width;
             updates.fontSize = textObj.fontSize;
           } else {
@@ -85,7 +104,7 @@ export function Canvas() {
     });
 
     canvas.on('text:changed', (e) => {
-      const obj = e.target as fabric.IText;
+      const obj = e.target as any;
       if (obj) {
         const data = (obj as any).data;
         if (data?.id) {
@@ -109,19 +128,23 @@ export function Canvas() {
     canvas.backgroundColor = template.backgroundColor;
 
     if (template.backgroundImage) {
-      fabric.FabricImage.fromURL(template.backgroundImage).then((img) => {
+      loadFabricImage(template.backgroundImage, { crossOrigin: 'anonymous' })
+        .then((img) => {
         img.scaleToWidth(template.width);
         img.scaleToHeight(template.height);
         canvas.backgroundImage = img;
         canvas.renderAll();
-      });
+        })
+        .catch((err) => {
+          console.error('Failed to load background image:', err);
+        });
     }
 
     // Sort elements by zIndex
     const sortedElements = [...template.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 
     sortedElements.forEach((element) => {
-      let fabricObj: fabric.FabricObject | null = null;
+      let fabricObj: any = null;
 
       switch (element.type) {
         case 'text':
@@ -146,7 +169,8 @@ export function Canvas() {
 
         case 'image':
           if (element.src) {
-            fabric.FabricImage.fromURL(element.src, { crossOrigin: 'anonymous' }).then((img) => {
+            loadFabricImage(element.src, { crossOrigin: 'anonymous' })
+              .then((img) => {
               img.set({
                 left: element.x,
                 top: element.y,
@@ -157,7 +181,10 @@ export function Canvas() {
               img.scaleToWidth(element.width || 200);
               canvas.add(img);
               canvas.renderAll();
-            });
+              })
+              .catch((err) => {
+                console.error('Failed to load image element:', err);
+              });
           }
           return;
 
