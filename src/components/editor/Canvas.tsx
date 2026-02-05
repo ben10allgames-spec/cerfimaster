@@ -269,10 +269,12 @@ export function Canvas() {
       className="flex-1 bg-editor-canvas-bg overflow-auto flex items-center justify-center p-8"
     >
       <div 
-        className="canvas-container bg-white"
+        className="canvas-container bg-white shadow-2xl rounded-sm"
         style={{
           width: template.width * zoom,
           height: template.height * zoom,
+          minWidth: template.width * zoom,
+          minHeight: template.height * zoom,
         }}
       >
         <canvas ref={canvasRef} />
