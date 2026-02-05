@@ -6,10 +6,7 @@ import {
   Image, 
   Minus, 
   Star, 
-  Sparkles,
   Triangle,
-  Hexagon,
-  Pentagon,
   LayoutTemplate,
   Shapes,
   Upload,
@@ -20,8 +17,8 @@ import {
   Heart,
   Plus,
   ChevronRight,
-  Grid3X3,
-  Palette
+  Palette,
+  Building2
 } from 'lucide-react';
 import { useEditor } from '@/contexts/EditorContext';
 import { cn } from '@/lib/utils';
@@ -33,16 +30,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { PRESET_TEMPLATES, PresetTemplate } from '@/data/certificateTemplates';
+import { PRESET_TEMPLATES, TEMPLATE_CATEGORIES, PresetTemplate } from '@/data/certificateTemplates';
 import { CertificateTemplate } from '@/types/certificate';
 import { v4 as uuidv4 } from 'uuid';
-
-interface ToolbarItem {
-  id: string;
-  icon: React.ElementType;
-  label: string;
-  action: () => void;
-}
 
 export function EditorSidebar() {
   const { addElement, template, setTemplate } = useEditor();
@@ -215,13 +205,14 @@ export function EditorSidebar() {
     { key: 'Title', label: 'Title/Position', icon: '🎖️' },
   ];
 
-  const templateCategories = [
-    { id: 'completion', label: 'Course Completion', icon: GraduationCap, color: 'text-blue-500' },
-    { id: 'participation', label: 'Participation', icon: Award, color: 'text-indigo-500' },
-    { id: 'achievement', label: 'Achievement', icon: Trophy, color: 'text-amber-500' },
-    { id: 'internship', label: 'Internship', icon: Briefcase, color: 'text-cyan-500' },
-    { id: 'appreciation', label: 'Appreciation', icon: Heart, color: 'text-rose-500' },
-  ];
+  const categoryIcons: Record<string, React.ElementType> = {
+    professional: Building2,
+    completion: GraduationCap,
+    participation: Award,
+    achievement: Trophy,
+    internship: Briefcase,
+    appreciation: Heart,
+  };
 
   const colorPalettes = [
     { name: 'Professional', colors: ['#1e293b', '#334155', '#64748b', '#94a3b8', '#e2e8f0'] },
@@ -266,40 +257,47 @@ export function EditorSidebar() {
                 Click a template to apply it. This will replace your current design.
               </p>
               
-              {templateCategories.map((category) => (
-                <div key={category.id} className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted flex items-center gap-2">
-                    <category.icon className={cn("w-4 h-4", category.color)} />
-                    {category.label}
-                  </h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    {PRESET_TEMPLATES.filter(t => t.category === category.id).map((preset) => (
-                      <button
-                        key={preset.id}
-                        onClick={() => handleApplyTemplate(preset)}
-                        className={cn(
-                          "w-full p-3 rounded-lg text-left transition-all",
-                          "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20",
-                          "group"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{preset.preview}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-editor-sidebar-foreground truncate">
-                              {preset.name}
-                            </p>
-                            <p className="text-[10px] text-editor-sidebar-muted truncate">
-                              {preset.description}
-                            </p>
+              {TEMPLATE_CATEGORIES.map((category) => {
+                const Icon = categoryIcons[category.id] || LayoutTemplate;
+                const templates = PRESET_TEMPLATES.filter(t => t.category === category.id);
+                
+                if (templates.length === 0) return null;
+                
+                return (
+                  <div key={category.id} className="space-y-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted flex items-center gap-2">
+                      <Icon className={cn("w-4 h-4", category.color)} />
+                      {category.label}
+                    </h4>
+                    <div className="grid grid-cols-1 gap-2">
+                      {templates.map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => handleApplyTemplate(preset)}
+                          className={cn(
+                            "w-full p-3 rounded-lg text-left transition-all",
+                            "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20",
+                            "group"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{preset.preview}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-editor-sidebar-foreground truncate">
+                                {preset.name}
+                              </p>
+                              <p className="text-[10px] text-editor-sidebar-muted truncate">
+                                {preset.description}
+                              </p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-editor-sidebar-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
-                          <ChevronRight className="w-4 h-4 text-editor-sidebar-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -455,7 +453,7 @@ export function EditorSidebar() {
                       "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-6 h-1 bg-current rounded" />
+                    <Minus className="w-5 h-1" strokeWidth={4} />
                     <span className="text-[10px] mt-2">Thick</span>
                   </button>
                   <button
@@ -466,13 +464,13 @@ export function EditorSidebar() {
                       "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-8 h-0.5 bg-amber-500 rounded" />
+                    <Minus className="w-5 h-1 text-yellow-500" strokeWidth={2} />
                     <span className="text-[10px] mt-2">Gold</span>
                   </button>
                 </div>
               </div>
 
-              {/* Upload Image */}
+              {/* Images */}
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
                   Images
@@ -481,7 +479,7 @@ export function EditorSidebar() {
                   onClick={handleImageUpload}
                   className={cn(
                     "w-full flex items-center justify-center gap-2 p-4 rounded-lg",
-                    "bg-white/5 hover:bg-white/10 transition-colors border-2 border-dashed border-white/20",
+                    "bg-white/5 hover:bg-white/10 transition-colors border border-dashed border-white/20",
                     "text-editor-sidebar-foreground hover:text-white"
                   )}
                 >
@@ -490,30 +488,29 @@ export function EditorSidebar() {
                 </button>
               </div>
 
-              {/* Dynamic Fields */}
+              {/* Placeholders */}
               <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted flex items-center gap-2">
-                  <Sparkles className="w-3 h-3" />
-                  Dynamic Fields
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
+                  Dynamic Placeholders
                 </h3>
-                <p className="text-[10px] text-editor-sidebar-muted">
-                  These fields will be replaced with data from your spreadsheet
+                <p className="text-[10px] text-editor-sidebar-muted mb-2">
+                  These fields will be auto-filled from your data
                 </p>
-                <div className="space-y-1">
+                <div className="grid grid-cols-1 gap-1">
                   {placeholders.map((placeholder) => (
                     <button
                       key={placeholder.key}
                       onClick={() => handleAddPlaceholder(placeholder.key)}
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg",
-                        "bg-primary/10 hover:bg-primary/20 transition-colors",
-                        "text-left text-sm"
+                        "flex items-center gap-2 p-2 rounded-lg text-left",
+                        "bg-white/5 hover:bg-white/10 transition-colors",
+                        "text-editor-sidebar-foreground hover:text-white"
                       )}
                     >
-                      <span className="text-base">{placeholder.icon}</span>
+                      <span className="text-lg">{placeholder.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <span className="text-primary font-mono text-xs block">{`{{${placeholder.key}}}`}</span>
-                        <span className="text-[10px] text-editor-sidebar-muted">{placeholder.label}</span>
+                        <p className="text-xs font-medium truncate">{placeholder.label}</p>
+                        <p className="text-[10px] text-editor-sidebar-muted font-mono">{`{{${placeholder.key}}}`}</p>
                       </div>
                     </button>
                   ))}
@@ -528,23 +525,20 @@ export function EditorSidebar() {
           <ScrollArea className="h-full">
             <div className="p-4 space-y-6">
               {/* Color Palettes */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
                   Color Palettes
                 </h3>
-                <p className="text-[10px] text-editor-sidebar-muted">
-                  Click any color to add it as an element fill color
-                </p>
                 {colorPalettes.map((palette) => (
                   <div key={palette.name} className="space-y-1">
-                    <span className="text-[10px] text-editor-sidebar-foreground">{palette.name}</span>
+                    <p className="text-xs text-editor-sidebar-foreground">{palette.name}</p>
                     <div className="flex gap-1">
-                      {palette.colors.map((color, index) => (
+                      {palette.colors.map((color, i) => (
                         <button
-                          key={`${palette.name}-${index}`}
-                          onClick={() => handleAddDecoShape(color, { width: 60, height: 60 })}
+                          key={i}
+                          onClick={() => handleAddDecoShape(color, { width: 100, height: 100 })}
                           className={cn(
-                            "w-10 h-10 rounded border border-white/20 hover:scale-110 transition-transform",
+                            "flex-1 aspect-square rounded-md border border-white/10 hover:scale-110 transition-transform",
                             color === '#ffffff' && "border-gray-300"
                           )}
                           style={{ backgroundColor: color }}
@@ -563,48 +557,48 @@ export function EditorSidebar() {
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => handleAddDecoShape('#c9a227', { width: 80, height: 4 })}
+                    onClick={() => handleAddDecoShape('#c9a227', { width: 400, height: 8 })}
                     className={cn(
-                      "flex flex-col items-center justify-center p-3 rounded-lg",
+                      "p-3 rounded-lg text-center",
                       "bg-white/5 hover:bg-white/10 transition-colors",
-                      "text-editor-sidebar-foreground"
+                      "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-12 h-1 bg-amber-500 rounded" />
-                    <span className="text-[10px] mt-2">Gold Bar</span>
+                    <div className="w-full h-1 bg-yellow-500 rounded mb-2" />
+                    <span className="text-[10px]">Gold Bar</span>
                   </button>
                   <button
-                    onClick={() => handleAddDecoShape('#1e293b', { width: 1063, height: 4 })}
+                    onClick={() => handleAddDecoShape('#6366f1', { width: 60, height: 794 })}
                     className={cn(
-                      "flex flex-col items-center justify-center p-3 rounded-lg",
+                      "p-3 rounded-lg text-center",
                       "bg-white/5 hover:bg-white/10 transition-colors",
-                      "text-editor-sidebar-foreground"
+                      "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-12 h-1 bg-slate-700 rounded" />
-                    <span className="text-[10px] mt-2">Full Border</span>
+                    <div className="w-2 h-6 bg-indigo-500 rounded mx-auto mb-2" />
+                    <span className="text-[10px]">Side Accent</span>
                   </button>
                   <button
-                    onClick={() => handleAddDecoShape('#6366f1', { width: 60, height: 60 })}
+                    onClick={() => handleAddDecoShape('#1e293b', { width: 100, height: 100 })}
                     className={cn(
-                      "flex flex-col items-center justify-center p-3 rounded-lg",
+                      "p-3 rounded-lg text-center",
                       "bg-white/5 hover:bg-white/10 transition-colors",
-                      "text-editor-sidebar-foreground"
+                      "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-6 h-6 bg-indigo-500 rounded" />
-                    <span className="text-[10px] mt-2">Accent Box</span>
+                    <div className="w-6 h-6 bg-slate-800 rounded mx-auto mb-2" />
+                    <span className="text-[10px]">Dark Box</span>
                   </button>
                   <button
-                    onClick={() => handleAddDecoShape('#0ea5e9', { width: 120, height: 40 })}
+                    onClick={() => handleAddDecoShape('#f8fafc', { width: 200, height: 200 })}
                     className={cn(
-                      "flex flex-col items-center justify-center p-3 rounded-lg",
+                      "p-3 rounded-lg text-center",
                       "bg-white/5 hover:bg-white/10 transition-colors",
-                      "text-editor-sidebar-foreground"
+                      "text-editor-sidebar-foreground hover:text-white"
                     )}
                   >
-                    <div className="w-10 h-4 bg-sky-500 rounded" />
-                    <span className="text-[10px] mt-2">Badge BG</span>
+                    <div className="w-6 h-6 bg-slate-100 border border-slate-300 rounded mx-auto mb-2" />
+                    <span className="text-[10px]">Light Box</span>
                   </button>
                 </div>
               </div>
@@ -612,19 +606,6 @@ export function EditorSidebar() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-
-      {/* Quick Tips */}
-      <div className="p-4 border-t border-border/20">
-        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-          <h4 className="text-xs font-semibold text-editor-sidebar-foreground mb-1">Quick Tips</h4>
-          <ul className="text-[10px] text-editor-sidebar-muted space-y-1">
-            <li>• Double-click text to edit inline</li>
-            <li>• Ctrl+Z / Ctrl+Y for undo/redo</li>
-            <li>• Use templates for quick starts</li>
-            <li>• Dynamic fields auto-fill from data</li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 }

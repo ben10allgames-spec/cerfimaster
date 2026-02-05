@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import { saveAs } from 'file-saver';
+import fabricModule from 'fabric';
 import { useEditor } from '@/contexts/EditorContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,15 +36,20 @@ import {
   Download,
   Award,
   FileSpreadsheet,
-  Settings,
   ImageIcon,
   Palette,
   FileDown,
   ChevronDown,
-  Trash2
+  Trash2,
+  FileText,
+  FileImage,
+  Loader2
 } from 'lucide-react';
-import { PAGE_SIZES, PageSize } from '@/types/certificate';
+import { PAGE_SIZES } from '@/types/certificate';
 import { cn } from '@/lib/utils';
+
+// Normalize Fabric.js import
+const fabric = ((fabricModule as any)?.fabric ?? fabricModule) as any;
 
 interface EditorToolbarProps {
   onOpenDataPanel: () => void;
@@ -63,10 +71,191 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
   const [customWidth, setCustomWidth] = useState(template.width);
   const [customHeight, setCustomHeight] = useState(template.height);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpg'>('pdf');
 
   const currentPageSize = PAGE_SIZES.find(
     p => p.width === template.width && p.height === template.height
   );
+
+  const loadFabricImage = (url: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const ImageCtor = fabric?.Image ?? fabric?.FabricImage;
+        if (!ImageCtor?.fromURL) {
+          reject(new Error('Fabric Image.fromURL is not available'));
+          return;
+        }
+        ImageCtor.fromURL(url, (img: any) => resolve(img), { crossOrigin: 'anonymous' });
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
+  const handleExportSingle = useCallback(async (format: 'pdf' | 'png' | 'jpg') => {
+    setIsExporting(true);
+    
+    try {
+      // Create a static canvas for export
+      const canvas = new fabric.StaticCanvas(null, {
+        width: template.width,
+        height: template.height,
+        backgroundColor: template.backgroundColor,
+      });
+
+      // Add background image if exists
+      if (template.backgroundImage) {
+        try {
+          const img = await loadFabricImage(template.backgroundImage);
+          img.scaleToWidth(template.width);
+          img.scaleToHeight(template.height);
+          canvas.backgroundImage = img;
+        } catch {
+          // Ignore background image errors
+        }
+      }
+
+      // Sort elements by zIndex
+      const sortedElements = [...template.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+
+      // Add elements
+      for (const element of sortedElements) {
+        switch (element.type) {
+          case 'text':
+          case 'placeholder':
+            const textObj = new fabric.IText(element.text || '', {
+              left: element.x,
+              top: element.y,
+              fontFamily: element.fontFamily || 'Inter',
+              fontSize: element.fontSize || 24,
+              fontWeight: element.fontWeight || 'normal',
+              fontStyle: element.fontStyle || 'normal',
+              fill: element.fill || '#000000',
+              textAlign: element.textAlign || 'left',
+              angle: element.rotation || 0,
+              opacity: element.opacity ?? 1,
+              charSpacing: (element.letterSpacing || 0) * 10,
+            });
+            canvas.add(textObj);
+            break;
+
+          case 'shape':
+            if (element.shapeType === 'circle') {
+              const circle = new fabric.Circle({
+                left: element.x,
+                top: element.y,
+                radius: Math.min(element.width || 100, element.height || 100) / 2,
+                fill: element.fill || '#e2e8f0',
+                stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1,
+                angle: element.rotation || 0,
+                opacity: element.opacity ?? 1,
+              });
+              canvas.add(circle);
+            } else if (element.shapeType === 'triangle') {
+              const triangle = new fabric.Triangle({
+                left: element.x,
+                top: element.y,
+                width: element.width || 100,
+                height: element.height || 100,
+                fill: element.fill || '#e2e8f0',
+                stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1,
+                angle: element.rotation || 0,
+                opacity: element.opacity ?? 1,
+              });
+              canvas.add(triangle);
+            } else {
+              const rect = new fabric.Rect({
+                left: element.x,
+                top: element.y,
+                width: element.width || 100,
+                height: element.height || 100,
+                fill: element.fill || '#e2e8f0',
+                stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1,
+                rx: 4,
+                ry: 4,
+                angle: element.rotation || 0,
+                opacity: element.opacity ?? 1,
+              });
+              canvas.add(rect);
+            }
+            break;
+
+          case 'line':
+            const line = new fabric.Line([0, 0, element.width || 200, 0], {
+              left: element.x,
+              top: element.y,
+              stroke: element.fill || '#000000',
+              strokeWidth: element.strokeWidth || 2,
+              angle: element.rotation || 0,
+              opacity: element.opacity ?? 1,
+            });
+            canvas.add(line);
+            break;
+
+          case 'image':
+            if (element.src) {
+              try {
+                const img = await loadFabricImage(element.src);
+                img.set({
+                  left: element.x,
+                  top: element.y,
+                  angle: element.rotation || 0,
+                  opacity: element.opacity ?? 1,
+                });
+                img.scaleToWidth(element.width || 200);
+                canvas.add(img);
+              } catch {
+                // Ignore image loading errors
+              }
+            }
+            break;
+        }
+      }
+
+      canvas.renderAll();
+
+      const filename = template.name.replace(/[<>:"/\\|?*]/g, '_') || 'certificate';
+
+      if (format === 'pdf') {
+        const dataUrl = canvas.toDataURL({
+          format: 'png',
+          quality: 1,
+          multiplier: 2,
+        });
+
+        const pdf = new jsPDF({
+          orientation: template.width > template.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [template.width, template.height],
+        });
+
+        pdf.addImage(dataUrl, 'PNG', 0, 0, template.width, template.height);
+        pdf.save(`${filename}.pdf`);
+      } else {
+        const dataUrl = canvas.toDataURL({
+          format: format === 'jpg' ? 'jpeg' : 'png',
+          quality: 1,
+          multiplier: 2,
+        });
+        
+        // Convert data URL to blob and save
+        const link = document.createElement('a');
+        link.download = `${filename}.${format}`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [template]);
 
   const handlePageSizeChange = (value: string) => {
     if (value === 'Custom') {
@@ -295,7 +484,7 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
                     onClick={() => updateTemplate({ backgroundColor: color })}
                     className={cn(
                       "w-6 h-6 rounded border",
-                      color === '#ffffff' ? 'border-gray-300' : 'border-white/20',
+                      color === '#ffffff' ? 'border-border' : 'border-white/20',
                       template.backgroundColor === color && 'ring-2 ring-primary ring-offset-1'
                     )}
                     style={{ backgroundColor: color }}
@@ -415,12 +604,67 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
         className="h-8"
       >
         <FileSpreadsheet className="w-4 h-4 mr-2" />
-        <span className="hidden sm:inline">Import Data</span>
+        <span className="hidden sm:inline">Bulk Generate</span>
       </Button>
-      <Button className="h-8 gradient-primary text-white">
-        <Download className="w-4 h-4 mr-2" />
-        <span className="hidden sm:inline">Export</span>
-      </Button>
+      
+      {/* Single Export */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button className="h-8 gradient-primary text-white" disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            <span className="hidden sm:inline">Export</span>
+            <ChevronDown className="w-3 h-3 ml-1" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-3" align="end">
+          <div className="space-y-3">
+            <div className="text-sm font-medium">Export Certificate</div>
+            
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => handleExportSingle('pdf')}
+                disabled={isExporting}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Download as PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => handleExportSingle('png')}
+                disabled={isExporting}
+              >
+                <FileImage className="w-4 h-4 mr-2" />
+                Download as PNG
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => handleExportSingle('jpg')}
+                disabled={isExporting}
+              >
+                <FileImage className="w-4 h-4 mr-2" />
+                Download as JPG
+              </Button>
+            </div>
+
+            <div className="pt-2 border-t">
+              <p className="text-xs text-muted-foreground">
+                For bulk generation with recipient data, use "Bulk Generate"
+              </p>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
