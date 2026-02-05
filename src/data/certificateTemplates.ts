@@ -5,7 +5,7 @@ export interface PresetTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'completion' | 'participation' | 'achievement' | 'internship' | 'appreciation';
+  category: 'completion' | 'participation' | 'achievement' | 'internship' | 'appreciation' | 'professional';
   preview: string;
   template: Omit<CertificateTemplate, 'id' | 'createdAt' | 'updatedAt'>;
 }
@@ -83,6 +83,576 @@ const createLineElement = (
 });
 
 export const PRESET_TEMPLATES: PresetTemplate[] = [
+  // ===== PROFESSIONAL TEMPLATES (Tech Company Style) =====
+  {
+    id: 'google-style',
+    name: 'Tech Modern - Google Style',
+    description: 'Clean, minimal design inspired by Google certificates',
+    category: 'professional',
+    preview: '🔵',
+    template: {
+      name: 'Professional Certificate',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#ffffff',
+      elements: [
+        // Top colorful bar
+        createShapeElement(0, 0, 281, 8, { fill: '#4285f4', stroke: 'transparent', zIndex: 0 }),
+        createShapeElement(281, 0, 281, 8, { fill: '#ea4335', stroke: 'transparent', zIndex: 1 }),
+        createShapeElement(562, 0, 281, 8, { fill: '#fbbc04', stroke: 'transparent', zIndex: 2 }),
+        createShapeElement(843, 0, 280, 8, { fill: '#34a853', stroke: 'transparent', zIndex: 3 }),
+        // Main content
+        createTextElement('Certificate of Completion', 561, 100, {
+          fontFamily: 'Roboto',
+          fontSize: 36,
+          fontWeight: 'normal',
+          fill: '#202124',
+          zIndex: 4,
+        }),
+        createPlaceholderElement('Name', 561, 200, {
+          fontFamily: 'Roboto',
+          fontSize: 48,
+          fontWeight: 'bold',
+          fill: '#202124',
+          zIndex: 5,
+        }),
+        createTextElement('has successfully completed', 561, 290, {
+          fontFamily: 'Roboto',
+          fontSize: 18,
+          fontWeight: 'normal',
+          fill: '#5f6368',
+          zIndex: 6,
+        }),
+        createPlaceholderElement('Course_Name', 561, 350, {
+          fontFamily: 'Roboto',
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#1a73e8',
+          zIndex: 7,
+        }),
+        createTextElement('an online non-credit course authorized by', 561, 420, {
+          fontFamily: 'Roboto',
+          fontSize: 16,
+          fill: '#5f6368',
+          zIndex: 8,
+        }),
+        createPlaceholderElement('Organization_Name', 561, 470, {
+          fontFamily: 'Roboto',
+          fontSize: 24,
+          fontWeight: 'bold',
+          fill: '#202124',
+          zIndex: 9,
+        }),
+        createLineElement(200, 600, 200, { fill: '#dadce0', strokeWidth: 1, zIndex: 10 }),
+        createLineElement(723, 600, 200, { fill: '#dadce0', strokeWidth: 1, zIndex: 11 }),
+        createPlaceholderElement('Date', 300, 620, {
+          fontFamily: 'Roboto',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#5f6368',
+          zIndex: 12,
+        }),
+        createTextElement('Date of Completion', 300, 645, {
+          fontFamily: 'Roboto',
+          fontSize: 11,
+          fill: '#80868b',
+          zIndex: 13,
+        }),
+        createTextElement('Instructor Signature', 823, 645, {
+          fontFamily: 'Roboto',
+          fontSize: 11,
+          fill: '#80868b',
+          zIndex: 14,
+        }),
+        createPlaceholderElement('Certificate_ID', 561, 740, {
+          fontFamily: 'Roboto',
+          fontSize: 10,
+          fontWeight: 'normal',
+          fill: '#9aa0a6',
+          zIndex: 15,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  {
+    id: 'coursera-style',
+    name: 'Platform Style - Coursera',
+    description: 'Professional learning platform certificate design',
+    category: 'professional',
+    preview: '📚',
+    template: {
+      name: 'Course Certificate',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#ffffff',
+      elements: [
+        // Blue header bar
+        createShapeElement(0, 0, 1123, 100, { fill: '#0056d2', stroke: 'transparent', zIndex: 0 }),
+        createTextElement('COURSERA', 100, 40, {
+          fontFamily: 'Arial',
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#ffffff',
+          textAlign: 'left',
+          zIndex: 1,
+        }),
+        // Main content
+        createTextElement('Certificate of Completion', 561, 160, {
+          fontFamily: 'Georgia',
+          fontSize: 32,
+          fontWeight: 'normal',
+          fill: '#1f1f1f',
+          zIndex: 2,
+        }),
+        createPlaceholderElement('Date', 561, 210, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#636363',
+          zIndex: 3,
+        }),
+        createPlaceholderElement('Name', 561, 290, {
+          fontFamily: 'Georgia',
+          fontSize: 44,
+          fontWeight: 'bold',
+          fill: '#1f1f1f',
+          zIndex: 4,
+        }),
+        createTextElement('has successfully completed the online course', 561, 370, {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fill: '#636363',
+          zIndex: 5,
+        }),
+        createPlaceholderElement('Course_Name', 561, 430, {
+          fontFamily: 'Georgia',
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#0056d2',
+          zIndex: 6,
+        }),
+        createTextElement('Offered by', 561, 500, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fill: '#636363',
+          zIndex: 7,
+        }),
+        createPlaceholderElement('Organization_Name', 561, 540, {
+          fontFamily: 'Arial',
+          fontSize: 22,
+          fontWeight: 'bold',
+          fill: '#1f1f1f',
+          zIndex: 8,
+        }),
+        // Signature section
+        createLineElement(150, 650, 180, { fill: '#e0e0e0', strokeWidth: 1, zIndex: 9 }),
+        createLineElement(793, 650, 180, { fill: '#e0e0e0', strokeWidth: 1, zIndex: 10 }),
+        createTextElement('Instructor', 240, 670, {
+          fontFamily: 'Arial',
+          fontSize: 11,
+          fill: '#9b9b9b',
+          zIndex: 11,
+        }),
+        createTextElement('Director of Coursera', 883, 670, {
+          fontFamily: 'Arial',
+          fontSize: 11,
+          fill: '#9b9b9b',
+          zIndex: 12,
+        }),
+        // Verify text
+        createTextElement('Verify at coursera.org/verify/', 561, 750, {
+          fontFamily: 'Arial',
+          fontSize: 10,
+          fill: '#9b9b9b',
+          zIndex: 13,
+        }),
+        createPlaceholderElement('Certificate_ID', 720, 750, {
+          fontFamily: 'Arial',
+          fontSize: 10,
+          fontWeight: 'normal',
+          fill: '#0056d2',
+          zIndex: 14,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  {
+    id: 'ibm-style',
+    name: 'Enterprise - IBM Style',
+    description: 'Corporate enterprise certificate design',
+    category: 'professional',
+    preview: '💻',
+    template: {
+      name: 'Professional Certificate',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#f4f4f4',
+      elements: [
+        // Dark header
+        createShapeElement(0, 0, 1123, 120, { fill: '#161616', stroke: 'transparent', zIndex: 0 }),
+        createTextElement('IBM', 80, 50, {
+          fontFamily: 'Arial',
+          fontSize: 36,
+          fontWeight: 'bold',
+          fill: '#ffffff',
+          textAlign: 'left',
+          zIndex: 1,
+        }),
+        createTextElement('Professional Certificate', 200, 55, {
+          fontFamily: 'Arial',
+          fontSize: 18,
+          fontWeight: 'normal',
+          fill: '#a8a8a8',
+          textAlign: 'left',
+          zIndex: 2,
+        }),
+        // Blue accent bar
+        createShapeElement(0, 120, 1123, 6, { fill: '#0f62fe', stroke: 'transparent', zIndex: 3 }),
+        // Content
+        createTextElement('This is to certify that', 561, 200, {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fill: '#525252',
+          zIndex: 4,
+        }),
+        createPlaceholderElement('Name', 561, 270, {
+          fontFamily: 'Arial',
+          fontSize: 42,
+          fontWeight: 'bold',
+          fill: '#161616',
+          zIndex: 5,
+        }),
+        createTextElement('has successfully earned the', 561, 350, {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fill: '#525252',
+          zIndex: 6,
+        }),
+        createPlaceholderElement('Course_Name', 561, 410, {
+          fontFamily: 'Arial',
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#0f62fe',
+          zIndex: 7,
+        }),
+        createTextElement('Professional Certificate', 561, 460, {
+          fontFamily: 'Arial',
+          fontSize: 18,
+          fill: '#161616',
+          zIndex: 8,
+        }),
+        createTextElement('This achievement certifies proficiency in enterprise-level skills', 561, 510, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fill: '#6f6f6f',
+          zIndex: 9,
+        }),
+        createPlaceholderElement('Organization_Name', 561, 560, {
+          fontFamily: 'Arial',
+          fontSize: 20,
+          fontWeight: 'bold',
+          fill: '#161616',
+          zIndex: 10,
+        }),
+        // Footer
+        createShapeElement(0, 700, 1123, 94, { fill: '#262626', stroke: 'transparent', zIndex: 11 }),
+        createPlaceholderElement('Date', 200, 730, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#a8a8a8',
+          zIndex: 12,
+        }),
+        createPlaceholderElement('Certificate_ID', 923, 730, {
+          fontFamily: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fill: '#6f6f6f',
+          zIndex: 13,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  {
+    id: 'linkedin-style',
+    name: 'Platform - LinkedIn Learning',
+    description: 'LinkedIn Learning certificate style',
+    category: 'professional',
+    preview: '💼',
+    template: {
+      name: 'Certificate of Completion',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#ffffff',
+      elements: [
+        // LinkedIn blue header
+        createShapeElement(0, 0, 1123, 80, { fill: '#0a66c2', stroke: 'transparent', zIndex: 0 }),
+        createTextElement('in', 530, 28, {
+          fontFamily: 'Arial',
+          fontSize: 24,
+          fontWeight: 'bold',
+          fill: '#ffffff',
+          zIndex: 1,
+        }),
+        createTextElement('Learning', 570, 28, {
+          fontFamily: 'Arial',
+          fontSize: 24,
+          fontWeight: 'normal',
+          fill: '#ffffff',
+          zIndex: 2,
+        }),
+        // Main content
+        createTextElement('Certificate of Completion', 561, 150, {
+          fontFamily: 'Georgia',
+          fontSize: 32,
+          fill: '#000000',
+          zIndex: 3,
+        }),
+        createTextElement('Congratulations!', 561, 210, {
+          fontFamily: 'Georgia',
+          fontSize: 18,
+          fontStyle: 'italic',
+          fill: '#666666',
+          zIndex: 4,
+        }),
+        createPlaceholderElement('Name', 561, 290, {
+          fontFamily: 'Georgia',
+          fontSize: 42,
+          fontWeight: 'bold',
+          fill: '#000000',
+          zIndex: 5,
+        }),
+        createTextElement('has completed', 561, 370, {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fill: '#666666',
+          zIndex: 6,
+        }),
+        createPlaceholderElement('Course_Name', 561, 430, {
+          fontFamily: 'Arial',
+          fontSize: 26,
+          fontWeight: 'bold',
+          fill: '#0a66c2',
+          zIndex: 7,
+        }),
+        createPlaceholderElement('Date', 561, 500, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#666666',
+          zIndex: 8,
+        }),
+        // Bottom section
+        createLineElement(350, 600, 423, { fill: '#e0e0e0', strokeWidth: 1, zIndex: 9 }),
+        createTextElement('This certificate is issued by LinkedIn Corporation', 561, 650, {
+          fontFamily: 'Arial',
+          fontSize: 12,
+          fill: '#999999',
+          zIndex: 10,
+        }),
+        createPlaceholderElement('Certificate_ID', 561, 700, {
+          fontFamily: 'Arial',
+          fontSize: 10,
+          fontWeight: 'normal',
+          fill: '#cccccc',
+          zIndex: 11,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  {
+    id: 'microsoft-style',
+    name: 'Enterprise - Microsoft Style',
+    description: 'Microsoft certification style design',
+    category: 'professional',
+    preview: '🪟',
+    template: {
+      name: 'Microsoft Certificate',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#ffffff',
+      elements: [
+        // Colored squares
+        createShapeElement(50, 50, 20, 20, { fill: '#f25022', stroke: 'transparent', zIndex: 0 }),
+        createShapeElement(72, 50, 20, 20, { fill: '#7fba00', stroke: 'transparent', zIndex: 1 }),
+        createShapeElement(50, 72, 20, 20, { fill: '#00a4ef', stroke: 'transparent', zIndex: 2 }),
+        createShapeElement(72, 72, 20, 20, { fill: '#ffb900', stroke: 'transparent', zIndex: 3 }),
+        createTextElement('Microsoft', 115, 60, {
+          fontFamily: 'Segoe UI',
+          fontSize: 26,
+          fontWeight: 'normal',
+          fill: '#737373',
+          textAlign: 'left',
+          zIndex: 4,
+        }),
+        // Main content
+        createTextElement('Certified', 561, 150, {
+          fontFamily: 'Segoe UI',
+          fontSize: 18,
+          fontWeight: 'normal',
+          fill: '#737373',
+          letterSpacing: 4,
+          zIndex: 5,
+        }),
+        createPlaceholderElement('Course_Name', 561, 200, {
+          fontFamily: 'Segoe UI',
+          fontSize: 36,
+          fontWeight: 'bold',
+          fill: '#0078d4',
+          zIndex: 6,
+        }),
+        createLineElement(361, 260, 400, { fill: '#0078d4', strokeWidth: 2, zIndex: 7 }),
+        createTextElement('This certifies that', 561, 310, {
+          fontFamily: 'Segoe UI',
+          fontSize: 16,
+          fill: '#737373',
+          zIndex: 8,
+        }),
+        createPlaceholderElement('Name', 561, 380, {
+          fontFamily: 'Segoe UI',
+          fontSize: 40,
+          fontWeight: 'bold',
+          fill: '#1a1a1a',
+          zIndex: 9,
+        }),
+        createTextElement('has successfully demonstrated skills and knowledge by completing', 561, 460, {
+          fontFamily: 'Segoe UI',
+          fontSize: 14,
+          fill: '#737373',
+          zIndex: 10,
+        }),
+        createTextElement('the requirements for Microsoft certification', 561, 485, {
+          fontFamily: 'Segoe UI',
+          fontSize: 14,
+          fill: '#737373',
+          zIndex: 11,
+        }),
+        createPlaceholderElement('Date', 300, 600, {
+          fontFamily: 'Segoe UI',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#737373',
+          zIndex: 12,
+        }),
+        createTextElement('Certification Date', 300, 625, {
+          fontFamily: 'Segoe UI',
+          fontSize: 11,
+          fill: '#a0a0a0',
+          zIndex: 13,
+        }),
+        createPlaceholderElement('Certificate_ID', 823, 600, {
+          fontFamily: 'Segoe UI',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#737373',
+          zIndex: 14,
+        }),
+        createTextElement('Certification Number', 823, 625, {
+          fontFamily: 'Segoe UI',
+          fontSize: 11,
+          fill: '#a0a0a0',
+          zIndex: 15,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  {
+    id: 'udemy-style',
+    name: 'Platform - Udemy Style',
+    description: 'Udemy online course certificate',
+    category: 'professional',
+    preview: '🎯',
+    template: {
+      name: 'Certificate of Completion',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#ffffff',
+      elements: [
+        // Purple header
+        createShapeElement(0, 0, 1123, 90, { fill: '#5624d0', stroke: 'transparent', zIndex: 0 }),
+        createTextElement('UC', 100, 30, {
+          fontFamily: 'Arial',
+          fontSize: 32,
+          fontWeight: 'bold',
+          fill: '#ffffff',
+          textAlign: 'left',
+          zIndex: 1,
+        }),
+        createTextElement('Udemy Certificate', 150, 38, {
+          fontFamily: 'Arial',
+          fontSize: 18,
+          fill: '#ffffff',
+          textAlign: 'left',
+          zIndex: 2,
+        }),
+        // Content
+        createTextElement('Certificate of Completion', 561, 160, {
+          fontFamily: 'Georgia',
+          fontSize: 32,
+          fill: '#1c1d1f',
+          zIndex: 3,
+        }),
+        createPlaceholderElement('Name', 561, 260, {
+          fontFamily: 'Georgia',
+          fontSize: 44,
+          fontWeight: 'bold',
+          fill: '#1c1d1f',
+          zIndex: 4,
+        }),
+        createLineElement(361, 320, 400, { fill: '#5624d0', strokeWidth: 3, zIndex: 5 }),
+        createPlaceholderElement('Course_Name', 561, 380, {
+          fontFamily: 'Arial',
+          fontSize: 26,
+          fontWeight: 'bold',
+          fill: '#5624d0',
+          zIndex: 6,
+        }),
+        createTextElement('Instructor:', 480, 450, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fill: '#6a6f73',
+          zIndex: 7,
+        }),
+        createPlaceholderElement('Organization_Name', 620, 450, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fontWeight: 'bold',
+          fill: '#1c1d1f',
+          zIndex: 8,
+        }),
+        createPlaceholderElement('Date', 561, 520, {
+          fontFamily: 'Arial',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#6a6f73',
+          zIndex: 9,
+        }),
+        // Footer
+        createShapeElement(0, 700, 1123, 94, { fill: '#f7f9fa', stroke: 'transparent', zIndex: 10 }),
+        createTextElement('Length:', 200, 730, {
+          fontFamily: 'Arial',
+          fontSize: 12,
+          fill: '#6a6f73',
+          zIndex: 11,
+        }),
+        createTextElement('X total hours', 260, 730, {
+          fontFamily: 'Arial',
+          fontSize: 12,
+          fontWeight: 'bold',
+          fill: '#1c1d1f',
+          zIndex: 12,
+        }),
+        createPlaceholderElement('Certificate_ID', 923, 730, {
+          fontFamily: 'Arial',
+          fontSize: 10,
+          fontWeight: 'normal',
+          fill: '#6a6f73',
+          zIndex: 13,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  // ===== EXISTING TEMPLATES =====
   {
     id: 'course-completion-elegant',
     name: 'Course Completion - Elegant',
@@ -95,7 +665,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
       height: 794,
       backgroundColor: '#ffffff',
       elements: [
-        // Border frame
         createShapeElement(30, 30, 1063, 734, {
           fill: 'transparent',
           stroke: '#c9a227',
@@ -108,7 +677,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           strokeWidth: 1,
           zIndex: 1,
         }),
-        // Header
         createTextElement('CERTIFICATE', 561, 80, {
           fontFamily: 'Playfair Display',
           fontSize: 18,
@@ -124,20 +692,17 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e3a5f',
           zIndex: 3,
         }),
-        // Decorative line
         createLineElement(361, 160, 400, {
           fill: '#c9a227',
           strokeWidth: 2,
           zIndex: 4,
         }),
-        // This is to certify
         createTextElement('This is to certify that', 561, 200, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#666666',
           zIndex: 5,
         }),
-        // Name placeholder
         createPlaceholderElement('Name', 561, 250, {
           fontFamily: 'Great Vibes',
           fontSize: 52,
@@ -145,14 +710,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e3a5f',
           zIndex: 6,
         }),
-        // Has successfully completed
         createTextElement('has successfully completed the course', 561, 330, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#666666',
           zIndex: 7,
         }),
-        // Course name placeholder
         createPlaceholderElement('Course_Name', 561, 380, {
           fontFamily: 'Playfair Display',
           fontSize: 32,
@@ -160,7 +723,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e3a5f',
           zIndex: 8,
         }),
-        // Organization
         createTextElement('Presented by', 561, 450, {
           fontFamily: 'Inter',
           fontSize: 14,
@@ -174,7 +736,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#333333',
           zIndex: 10,
         }),
-        // Date line
         createLineElement(200, 620, 200, {
           fill: '#1e3a5f',
           strokeWidth: 1,
@@ -193,7 +754,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#888888',
           zIndex: 13,
         }),
-        // Signature line
         createLineElement(723, 620, 200, {
           fill: '#1e3a5f',
           strokeWidth: 1,
@@ -205,7 +765,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#888888',
           zIndex: 15,
         }),
-        // Certificate ID
         createPlaceholderElement('Certificate_ID', 561, 730, {
           fontFamily: 'Inter',
           fontSize: 10,
@@ -228,14 +787,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
       height: 794,
       backgroundColor: '#f8fafc',
       elements: [
-        // Left accent bar
         createShapeElement(0, 0, 60, 794, {
           fill: '#6366f1',
           stroke: 'transparent',
           strokeWidth: 0,
           zIndex: 0,
         }),
-        // Header badge
         createShapeElement(481, 50, 160, 50, {
           shapeType: 'rectangle',
           fill: '#6366f1',
@@ -251,7 +808,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           letterSpacing: 4,
           zIndex: 2,
         }),
-        // Main title
         createTextElement('OF PARTICIPATION', 561, 140, {
           fontFamily: 'Montserrat',
           fontSize: 36,
@@ -259,14 +815,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e293b',
           zIndex: 3,
         }),
-        // This is to certify
         createTextElement('This certificate is proudly presented to', 561, 220, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
           zIndex: 4,
         }),
-        // Name
         createPlaceholderElement('Name', 561, 280, {
           fontFamily: 'Playfair Display',
           fontSize: 48,
@@ -274,14 +828,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#6366f1',
           zIndex: 5,
         }),
-        // For participating in
         createTextElement('for participating in', 561, 360, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
           zIndex: 6,
         }),
-        // Event name
         createPlaceholderElement('Course_Name', 561, 410, {
           fontFamily: 'Montserrat',
           fontSize: 28,
@@ -289,7 +841,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e293b',
           zIndex: 7,
         }),
-        // Organization
         createTextElement('organized by', 561, 480, {
           fontFamily: 'Inter',
           fontSize: 14,
@@ -303,7 +854,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#475569',
           zIndex: 9,
         }),
-        // Bottom section
         createLineElement(200, 620, 250, {
           fill: '#6366f1',
           strokeWidth: 2,
@@ -333,7 +883,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#94a3b8',
           zIndex: 14,
         }),
-        // Certificate ID
         createPlaceholderElement('Certificate_ID', 561, 750, {
           fontFamily: 'Inter',
           fontSize: 10,
@@ -356,14 +905,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
       height: 794,
       backgroundColor: '#1e293b',
       elements: [
-        // Inner frame
         createShapeElement(50, 50, 1023, 694, {
           fill: '#ffffff',
           stroke: '#c9a227',
           strokeWidth: 4,
           zIndex: 0,
         }),
-        // Corner decorations (simplified as shapes)
         createShapeElement(50, 50, 80, 80, {
           fill: '#c9a227',
           stroke: 'transparent',
@@ -388,7 +935,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           strokeWidth: 0,
           zIndex: 4,
         }),
-        // Certificate of
         createTextElement('CERTIFICATE OF', 561, 120, {
           fontFamily: 'Montserrat',
           fontSize: 14,
@@ -397,7 +943,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           letterSpacing: 6,
           zIndex: 5,
         }),
-        // Achievement
         createTextElement('ACHIEVEMENT', 561, 160, {
           fontFamily: 'Playfair Display',
           fontSize: 48,
@@ -405,20 +950,17 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e293b',
           zIndex: 6,
         }),
-        // Decorative line
         createLineElement(411, 210, 300, {
           fill: '#c9a227',
           strokeWidth: 3,
           zIndex: 7,
         }),
-        // This is presented to
         createTextElement('This certificate is proudly presented to', 561, 260, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
           zIndex: 8,
         }),
-        // Name
         createPlaceholderElement('Name', 561, 320, {
           fontFamily: 'Great Vibes',
           fontSize: 56,
@@ -426,14 +968,12 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e293b',
           zIndex: 9,
         }),
-        // For outstanding achievement
         createTextElement('for outstanding achievement in', 561, 400, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
           zIndex: 10,
         }),
-        // Achievement description
         createPlaceholderElement('Course_Name', 561, 450, {
           fontFamily: 'Playfair Display',
           fontSize: 28,
@@ -441,7 +981,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#1e293b',
           zIndex: 11,
         }),
-        // Organization
         createPlaceholderElement('Organization_Name', 561, 520, {
           fontFamily: 'Montserrat',
           fontSize: 18,
@@ -449,7 +988,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#475569',
           zIndex: 12,
         }),
-        // Date and signature
         createLineElement(180, 620, 200, {
           fill: '#1e293b',
           strokeWidth: 1,
@@ -479,7 +1017,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
           fill: '#94a3b8',
           zIndex: 17,
         }),
-        // Certificate ID
         createPlaceholderElement('Certificate_ID', 561, 710, {
           fontFamily: 'Inter',
           fontSize: 10,
@@ -502,131 +1039,105 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
       height: 794,
       backgroundColor: '#ffffff',
       elements: [
-        // Top bar
         createShapeElement(0, 0, 1123, 15, {
           fill: '#0ea5e9',
           stroke: 'transparent',
-          strokeWidth: 0,
           zIndex: 0,
         }),
-        // Bottom bar
         createShapeElement(0, 779, 1123, 15, {
           fill: '#0ea5e9',
           stroke: 'transparent',
-          strokeWidth: 0,
           zIndex: 1,
         }),
-        // Certificate badge
-        createTextElement('INTERNSHIP', 561, 60, {
+        createTextElement('INTERNSHIP', 561, 80, {
           fontFamily: 'Montserrat',
           fontSize: 14,
           fontWeight: 'bold',
           fill: '#0ea5e9',
-          letterSpacing: 6,
+          letterSpacing: 8,
           zIndex: 2,
         }),
-        // Certificate
-        createTextElement('CERTIFICATE', 561, 100, {
+        createTextElement('CERTIFICATE', 561, 120, {
           fontFamily: 'Playfair Display',
-          fontSize: 44,
+          fontSize: 42,
           fontWeight: 'bold',
           fill: '#0f172a',
           zIndex: 3,
         }),
-        // Decorative element
-        createLineElement(461, 155, 200, {
-          fill: '#0ea5e9',
-          strokeWidth: 3,
-          zIndex: 4,
-        }),
-        // This is to certify
         createTextElement('This is to certify that', 561, 200, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
-          zIndex: 5,
+          zIndex: 4,
         }),
-        // Name
         createPlaceholderElement('Name', 561, 260, {
           fontFamily: 'Playfair Display',
           fontSize: 48,
           fontWeight: 'bold',
           fill: '#0f172a',
-          zIndex: 6,
+          zIndex: 5,
         }),
-        // Has successfully completed
         createTextElement('has successfully completed an internship at', 561, 340, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#64748b',
-          zIndex: 7,
+          zIndex: 6,
         }),
-        // Organization
-        createPlaceholderElement('Organization_Name', 561, 390, {
+        createPlaceholderElement('Organization_Name', 561, 395, {
           fontFamily: 'Montserrat',
           fontSize: 28,
           fontWeight: 'bold',
           fill: '#0ea5e9',
+          zIndex: 7,
+        }),
+        createTextElement('as', 561, 455, {
+          fontFamily: 'Inter',
+          fontSize: 16,
+          fill: '#64748b',
           zIndex: 8,
         }),
-        // Department/Role
-        createTextElement('as', 561, 450, {
-          fontFamily: 'Inter',
-          fontSize: 14,
-          fill: '#94a3b8',
-          zIndex: 9,
-        }),
-        createPlaceholderElement('Course_Name', 561, 490, {
+        createPlaceholderElement('Title', 561, 495, {
           fontFamily: 'Montserrat',
           fontSize: 22,
           fontWeight: 'bold',
           fill: '#334155',
+          zIndex: 9,
+        }),
+        createLineElement(200, 600, 200, {
+          fill: '#0ea5e9',
+          strokeWidth: 2,
           zIndex: 10,
         }),
-        // Duration text
-        createTextElement('Duration of Internship', 561, 550, {
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fill: '#94a3b8',
+        createLineElement(723, 600, 200, {
+          fill: '#0ea5e9',
+          strokeWidth: 2,
           zIndex: 11,
         }),
-        createPlaceholderElement('Date', 561, 580, {
+        createPlaceholderElement('Date', 300, 625, {
           fontFamily: 'Inter',
-          fontSize: 16,
-          fontWeight: 'bold',
+          fontSize: 14,
+          fontWeight: 'normal',
           fill: '#475569',
           zIndex: 12,
         }),
-        // Signatures
-        createLineElement(180, 660, 220, {
-          fill: '#0f172a',
-          strokeWidth: 1,
+        createTextElement('Date', 300, 650, {
+          fontFamily: 'Inter',
+          fontSize: 10,
+          fill: '#94a3b8',
           zIndex: 13,
         }),
-        createTextElement('HR Manager', 290, 690, {
+        createTextElement('Supervisor', 823, 650, {
           fontFamily: 'Inter',
-          fontSize: 11,
-          fill: '#64748b',
+          fontSize: 10,
+          fill: '#94a3b8',
           zIndex: 14,
         }),
-        createLineElement(723, 660, 220, {
-          fill: '#0f172a',
-          strokeWidth: 1,
-          zIndex: 15,
-        }),
-        createTextElement('Department Head', 833, 690, {
-          fontFamily: 'Inter',
-          fontSize: 11,
-          fill: '#64748b',
-          zIndex: 16,
-        }),
-        // Certificate ID
-        createPlaceholderElement('Certificate_ID', 561, 750, {
+        createPlaceholderElement('Certificate_ID', 561, 720, {
           fontFamily: 'Inter',
           fontSize: 10,
           fontWeight: 'normal',
           fill: '#cbd5e1',
-          zIndex: 17,
+          zIndex: 15,
         }),
       ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
     },
@@ -634,133 +1145,223 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
   {
     id: 'appreciation-warm',
     name: 'Appreciation - Warm',
-    description: 'Heartfelt design for appreciation certificates',
+    description: 'Warm and welcoming design for appreciation certificates',
     category: 'appreciation',
-    preview: '❤️',
+    preview: '💖',
     template: {
       name: 'Appreciation Certificate',
       width: 1123,
       height: 794,
       backgroundColor: '#fef7f0',
       elements: [
-        // Border
-        createShapeElement(25, 25, 1073, 744, {
+        createShapeElement(30, 30, 1063, 734, {
           fill: 'transparent',
           stroke: '#d97706',
           strokeWidth: 2,
           zIndex: 0,
         }),
-        createShapeElement(35, 35, 1053, 724, {
-          fill: 'transparent',
-          stroke: '#fbbf24',
-          strokeWidth: 1,
-          zIndex: 1,
-        }),
-        // Certificate of
-        createTextElement('CERTIFICATE OF', 561, 90, {
+        createTextElement('CERTIFICATE OF', 561, 100, {
           fontFamily: 'Montserrat',
           fontSize: 14,
           fontWeight: 'normal',
           fill: '#d97706',
-          letterSpacing: 8,
-          zIndex: 2,
+          letterSpacing: 6,
+          zIndex: 1,
         }),
-        // Appreciation
-        createTextElement('APPRECIATION', 561, 140, {
+        createTextElement('APPRECIATION', 561, 145, {
           fontFamily: 'Playfair Display',
           fontSize: 48,
           fontWeight: 'bold',
           fill: '#92400e',
-          zIndex: 3,
+          zIndex: 2,
         }),
-        // Decorative lines
-        createLineElement(361, 195, 400, {
+        createLineElement(411, 195, 300, {
           fill: '#d97706',
           strokeWidth: 2,
+          zIndex: 3,
+        }),
+        createTextElement('This certificate is presented to', 561, 250, {
+          fontFamily: 'Inter',
+          fontSize: 16,
+          fill: '#78716c',
           zIndex: 4,
         }),
-        // This is presented
-        createTextElement('This certificate is warmly presented to', 561, 245, {
-          fontFamily: 'Inter',
-          fontSize: 16,
-          fill: '#78716c',
+        createPlaceholderElement('Name', 561, 310, {
+          fontFamily: 'Great Vibes',
+          fontSize: 52,
+          fontWeight: 'normal',
+          fill: '#92400e',
           zIndex: 5,
         }),
-        // Name
-        createPlaceholderElement('Name', 561, 310, {
-          fontFamily: 'Dancing Script',
-          fontSize: 52,
-          fontWeight: 'bold',
-          fill: '#92400e',
-          zIndex: 6,
-        }),
-        // In recognition
-        createTextElement('in recognition of valuable contributions to', 561, 390, {
+        createTextElement('in recognition of your valuable contribution to', 561, 390, {
           fontFamily: 'Inter',
           fontSize: 16,
           fill: '#78716c',
-          zIndex: 7,
+          zIndex: 6,
         }),
-        // Course/Event
         createPlaceholderElement('Course_Name', 561, 440, {
           fontFamily: 'Playfair Display',
           fontSize: 28,
           fontWeight: 'bold',
-          fill: '#292524',
-          zIndex: 8,
+          fill: '#92400e',
+          zIndex: 7,
         }),
-        // Thank you message
         createTextElement('Your dedication and hard work are truly appreciated.', 561, 510, {
           fontFamily: 'Inter',
           fontSize: 14,
           fontStyle: 'italic',
-          fill: '#78716c',
-          zIndex: 9,
+          fill: '#a8a29e',
+          zIndex: 8,
         }),
-        // Organization
         createPlaceholderElement('Organization_Name', 561, 560, {
           fontFamily: 'Montserrat',
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: 'bold',
-          fill: '#44403c',
+          fill: '#57534e',
+          zIndex: 9,
+        }),
+        createLineElement(200, 650, 200, {
+          fill: '#d97706',
+          strokeWidth: 1,
           zIndex: 10,
         }),
-        // Date and signature
-        createLineElement(180, 650, 200, {
-          fill: '#92400e',
+        createLineElement(723, 650, 200, {
+          fill: '#d97706',
           strokeWidth: 1,
           zIndex: 11,
         }),
-        createPlaceholderElement('Date', 280, 670, {
+        createPlaceholderElement('Date', 300, 675, {
           fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: 'normal',
-          fill: '#57534e',
+          fill: '#78716c',
           zIndex: 12,
         }),
-        createTextElement('Date', 280, 695, {
+        createTextElement('Date', 300, 700, {
           fontFamily: 'Inter',
           fontSize: 10,
           fill: '#a8a29e',
           zIndex: 13,
         }),
-        createLineElement(743, 650, 200, {
-          fill: '#92400e',
-          strokeWidth: 1,
-          zIndex: 14,
-        }),
-        createTextElement('Signature', 843, 695, {
+        createTextElement('Signature', 823, 700, {
           fontFamily: 'Inter',
           fontSize: 10,
           fill: '#a8a29e',
+          zIndex: 14,
+        }),
+      ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
+    },
+  },
+  // ===== UNIVERSITY STYLE TEMPLATES =====
+  {
+    id: 'university-classic',
+    name: 'University - Classic',
+    description: 'Traditional formal university certificate',
+    category: 'completion',
+    preview: '🎓',
+    template: {
+      name: 'Academic Certificate',
+      width: 1123,
+      height: 794,
+      backgroundColor: '#fffef7',
+      elements: [
+        // Ornate border
+        createShapeElement(20, 20, 1083, 754, {
+          fill: 'transparent',
+          stroke: '#8b7355',
+          strokeWidth: 4,
+          zIndex: 0,
+        }),
+        createShapeElement(35, 35, 1053, 724, {
+          fill: 'transparent',
+          stroke: '#c9a227',
+          strokeWidth: 1,
+          zIndex: 1,
+        }),
+        // University seal area
+        createShapeElement(511, 40, 100, 100, {
+          shapeType: 'circle',
+          fill: '#1e3a5f',
+          stroke: '#c9a227',
+          strokeWidth: 3,
+          zIndex: 2,
+        }),
+        // Header
+        createPlaceholderElement('Organization_Name', 561, 170, {
+          fontFamily: 'Times New Roman',
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#1e3a5f',
+          zIndex: 3,
+        }),
+        createTextElement('hereby certifies that', 561, 220, {
+          fontFamily: 'Times New Roman',
+          fontSize: 16,
+          fontStyle: 'italic',
+          fill: '#5c4a32',
+          zIndex: 4,
+        }),
+        createPlaceholderElement('Name', 561, 290, {
+          fontFamily: 'Times New Roman',
+          fontSize: 44,
+          fontWeight: 'bold',
+          fill: '#1e3a5f',
+          zIndex: 5,
+        }),
+        createTextElement('has successfully completed the requirements for', 561, 365, {
+          fontFamily: 'Times New Roman',
+          fontSize: 16,
+          fill: '#5c4a32',
+          zIndex: 6,
+        }),
+        createPlaceholderElement('Course_Name', 561, 420, {
+          fontFamily: 'Times New Roman',
+          fontSize: 32,
+          fontWeight: 'bold',
+          fontStyle: 'italic',
+          fill: '#1e3a5f',
+          zIndex: 7,
+        }),
+        createTextElement('conferred this', 480, 490, {
+          fontFamily: 'Times New Roman',
+          fontSize: 14,
+          fill: '#5c4a32',
+          zIndex: 8,
+        }),
+        createPlaceholderElement('Date', 600, 490, {
+          fontFamily: 'Times New Roman',
+          fontSize: 14,
+          fontWeight: 'normal',
+          fill: '#1e3a5f',
+          zIndex: 9,
+        }),
+        // Signatures
+        createLineElement(150, 620, 200, { fill: '#8b7355', strokeWidth: 1, zIndex: 10 }),
+        createLineElement(461, 620, 200, { fill: '#8b7355', strokeWidth: 1, zIndex: 11 }),
+        createLineElement(773, 620, 200, { fill: '#8b7355', strokeWidth: 1, zIndex: 12 }),
+        createTextElement('Dean', 250, 645, {
+          fontFamily: 'Times New Roman',
+          fontSize: 11,
+          fill: '#8b7355',
+          zIndex: 13,
+        }),
+        createTextElement('Registrar', 561, 645, {
+          fontFamily: 'Times New Roman',
+          fontSize: 11,
+          fill: '#8b7355',
+          zIndex: 14,
+        }),
+        createTextElement('President', 873, 645, {
+          fontFamily: 'Times New Roman',
+          fontSize: 11,
+          fill: '#8b7355',
           zIndex: 15,
         }),
-        // Certificate ID
-        createPlaceholderElement('Certificate_ID', 561, 735, {
-          fontFamily: 'Inter',
+        createPlaceholderElement('Certificate_ID', 561, 730, {
+          fontFamily: 'Times New Roman',
           fontSize: 10,
           fontWeight: 'normal',
-          fill: '#d6d3d1',
+          fill: '#a89078',
           zIndex: 16,
         }),
       ].map((el, index) => ({ ...el, id: uuidv4(), zIndex: index })) as CertificateElement[],
@@ -768,10 +1369,11 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
   },
 ];
 
-export const getTemplatesByCategory = (category: PresetTemplate['category']) => {
-  return PRESET_TEMPLATES.filter(t => t.category === category);
-};
-
-export const getTemplateById = (id: string) => {
-  return PRESET_TEMPLATES.find(t => t.id === id);
-};
+export const TEMPLATE_CATEGORIES = [
+  { id: 'professional', label: 'Professional', icon: '💼', color: 'text-blue-500' },
+  { id: 'completion', label: 'Course Completion', icon: '🎓', color: 'text-emerald-500' },
+  { id: 'participation', label: 'Participation', icon: '🏅', color: 'text-indigo-500' },
+  { id: 'achievement', label: 'Achievement', icon: '🏆', color: 'text-amber-500' },
+  { id: 'internship', label: 'Internship', icon: '👔', color: 'text-cyan-500' },
+  { id: 'appreciation', label: 'Appreciation', icon: '💖', color: 'text-rose-500' },
+];
