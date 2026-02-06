@@ -1,4 +1,5 @@
-import { Award } from 'lucide-react';
+import { Award, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
@@ -20,14 +21,15 @@ export function Footer() {
 
           {/* Links */}
           <div className="flex items-center gap-6">
+            <Link to="/verify" className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-1">
+              <Shield className="w-3 h-3" />
+              Verify Certificate
+            </Link>
             <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
               Privacy
             </a>
             <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
               Terms
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Contact
             </a>
           </div>
         </div>

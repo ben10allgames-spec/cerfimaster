@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      certificates: {
+        Row: {
+          course_name: string | null
+          created_at: string
+          credential_id: string
+          id: string
+          is_valid: boolean
+          issue_date: string
+          metadata: Json | null
+          organization_name: string | null
+          qr_code_data: string | null
+          recipient_email: string | null
+          recipient_name: string
+          template_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_name?: string | null
+          created_at?: string
+          credential_id: string
+          id?: string
+          is_valid?: boolean
+          issue_date?: string
+          metadata?: Json | null
+          organization_name?: string | null
+          qr_code_data?: string | null
+          recipient_email?: string | null
+          recipient_name: string
+          template_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_name?: string | null
+          created_at?: string
+          credential_id?: string
+          id?: string
+          is_valid?: boolean
+          issue_date?: string
+          metadata?: Json | null
+          organization_name?: string | null
+          qr_code_data?: string | null
+          recipient_email?: string | null
+          recipient_name?: string
+          template_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

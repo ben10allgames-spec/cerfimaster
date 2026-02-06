@@ -27,9 +27,9 @@ export function Navbar() {
             <a href="#templates" className="text-muted-foreground hover:text-foreground transition-colors">
               Templates
             </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </a>
+            <Link to="/verify" className="text-muted-foreground hover:text-foreground transition-colors">
+              Verify Certificate
+            </Link>
           </div>
 
           {/* Desktop CTA */}
@@ -75,13 +75,13 @@ export function Navbar() {
               >
                 Templates
               </a>
-              <a 
-                href="#pricing" 
+              <Link 
+                to="/verify"
                 className="block text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Pricing
-              </a>
+                Verify Certificate
+              </Link>
               <Link to="/editor" onClick={() => setIsOpen(false)}>
                 <Button className="w-full gradient-primary text-white">
                   Open Editor

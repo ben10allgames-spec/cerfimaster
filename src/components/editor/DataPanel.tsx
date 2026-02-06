@@ -5,6 +5,8 @@ import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
 import fabricModule from 'fabric';
 import { useEditor } from '@/contexts/EditorContext';
+import { supabase } from '@/integrations/supabase/client';
+import { generateCredentialId, generateCurrentDate, generateVerificationUrl } from '@/lib/credentialGenerator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,9 +43,11 @@ import {
   Sparkles,
   FileImage,
   FileText,
-  Archive
+  Archive,
+  Shield
 } from 'lucide-react';
 import { RecipientData, ColumnMapping } from '@/types/certificate';
+import { toast } from 'sonner';
 
 // Normalize Fabric.js import
 const fabric = ((fabricModule as any)?.fabric ?? fabricModule) as any;
@@ -70,6 +74,7 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
   const [columns, setColumns] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [exportBothFormats, setExportBothFormats] = useState(false);
+  const [saveToDB, setSaveToDB] = useState(true);
 
   // Get placeholders from template
   const placeholders = template.elements
@@ -168,9 +173,16 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
 
     const zip = new JSZip();
     const formats = exportBothFormats ? ['pdf', 'png'] : [exportSettings.format];
+    const certificatesToSave: any[] = [];
+    const baseUrl = window.location.origin;
 
     for (let i = 0; i < recipientData.length; i++) {
       const recipient = recipientData[i];
+      
+      // Generate unique credential ID and current date for each certificate
+      const credentialId = generateCredentialId();
+      const currentDate = generateCurrentDate();
+      const verificationUrl = generateVerificationUrl(credentialId, baseUrl);
       
       // Create a temporary canvas for generation
       const canvas = new fabric.StaticCanvas(null, {
@@ -194,6 +206,12 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
       // Sort elements by zIndex
       const sortedElements = [...template.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 
+      // Collect mapped values for database
+      let recipientName = '';
+      let courseName = '';
+      let organizationName = '';
+      let recipientEmail = '';
+
       // Add elements with replaced placeholders
       for (const element of sortedElements) {
         let text = element.text || '';
@@ -201,9 +219,26 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
         // Replace placeholders with actual data
         if (element.type === 'placeholder' && element.placeholderKey) {
           const mapping = columnMappings.find(m => m.placeholder === element.placeholderKey);
-          if (mapping && mapping.column) {
+          
+          // Handle auto-generated fields
+          if (element.placeholderKey === 'Certificate_ID') {
+            text = credentialId;
+          } else if (element.placeholderKey === 'Date') {
+            // Use mapped date if available, otherwise use current date
+            if (mapping && mapping.column && recipient[mapping.column]) {
+              text = String(recipient[mapping.column]);
+            } else {
+              text = currentDate;
+            }
+          } else if (mapping && mapping.column) {
             text = String(recipient[mapping.column] || '');
           }
+
+          // Collect values for database
+          if (element.placeholderKey === 'Name') recipientName = text;
+          if (element.placeholderKey === 'Course_Name') courseName = text;
+          if (element.placeholderKey === 'Organization_Name') organizationName = text;
+          if (element.placeholderKey === 'Email') recipientEmail = text;
         }
 
         switch (element.type) {
@@ -306,6 +341,23 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
       // Generate filename using recipient name
       const filename = generateFilename(recipient, exportSettings.namingPattern);
 
+      // Prepare certificate record for database
+      if (saveToDB) {
+        certificatesToSave.push({
+          credential_id: credentialId,
+          recipient_name: recipientName || filename,
+          recipient_email: recipientEmail || null,
+          course_name: courseName || null,
+          organization_name: organizationName || null,
+          template_name: template.name,
+          qr_code_data: verificationUrl,
+          metadata: {
+            exported_formats: formats,
+            filename: filename,
+          },
+        });
+      }
+
       // Export in each format
       for (const format of formats) {
         if (format === 'pdf') {
@@ -351,6 +403,24 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
         status: 'generating',
         message: `Processing: ${filename}` 
       });
+    }
+
+    // Save certificates to database
+    if (saveToDB && certificatesToSave.length > 0) {
+      try {
+        const { error: insertError } = await supabase
+          .from('certificates')
+          .insert(certificatesToSave);
+
+        if (insertError) {
+          console.error('Error saving certificates:', insertError);
+          toast.error('Certificates generated but failed to save to database');
+        } else {
+          toast.success(`${certificatesToSave.length} certificates saved for verification`);
+        }
+      } catch (err) {
+        console.error('Database error:', err);
+      }
     }
 
     // Download ZIP
@@ -557,6 +627,18 @@ export function DataPanel({ isOpen, onClose }: DataPanelProps) {
           />
           <Label htmlFor="bothFormats" className="text-sm cursor-pointer">
             Export as both PDF and PNG (organized in folders)
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2 p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+          <Checkbox 
+            id="saveToDB" 
+            checked={saveToDB}
+            onCheckedChange={(checked) => setSaveToDB(checked as boolean)}
+          />
+          <Label htmlFor="saveToDB" className="text-sm cursor-pointer flex items-center gap-2">
+            <Shield className="w-4 h-4 text-emerald-500" />
+            Save for online verification (auto credential ID & date)
           </Label>
         </div>
 
