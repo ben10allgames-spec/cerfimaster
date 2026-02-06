@@ -30,7 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { PRESET_TEMPLATES, TEMPLATE_CATEGORIES, PresetTemplate } from '@/data/certificateTemplates';
+import { PRESET_TEMPLATES, TEMPLATE_CATEGORIES, PresetTemplate, TemplateCategory } from '@/data/certificateTemplates';
 import { CertificateTemplate } from '@/types/certificate';
 import { v4 as uuidv4 } from 'uuid';
 
