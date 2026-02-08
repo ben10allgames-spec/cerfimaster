@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 
 function EditorContent() {
   const [isDataPanelOpen, setIsDataPanelOpen] = useState(false);
+  const [showLeftPanel, setShowLeftPanel] = useState(true);
+  const [showRightPanel, setShowRightPanel] = useState(true);
   const { 
     undo, 
     redo, 
@@ -134,11 +136,17 @@ function EditorContent() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <EditorToolbar onOpenDataPanel={() => setIsDataPanelOpen(true)} />
+      <EditorToolbar 
+        onOpenDataPanel={() => setIsDataPanelOpen(true)}
+        showLeftPanel={showLeftPanel}
+        showRightPanel={showRightPanel}
+        onToggleLeftPanel={() => setShowLeftPanel(!showLeftPanel)}
+        onToggleRightPanel={() => setShowRightPanel(!showRightPanel)}
+      />
       <div className="flex-1 flex overflow-hidden">
-        <EditorSidebar />
+        {showLeftPanel && <EditorSidebar />}
         <Canvas />
-        <PropertiesPanel />
+        {showRightPanel && <PropertiesPanel />}
       </div>
       <DataPanel 
         isOpen={isDataPanelOpen} 

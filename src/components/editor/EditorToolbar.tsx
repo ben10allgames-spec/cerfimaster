@@ -4,6 +4,8 @@ import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
 import fabricModule from 'fabric';
 import { useEditor } from '@/contexts/EditorContext';
+import { supabase } from '@/integrations/supabase/client';
+import { generateCredentialId, generateCurrentDate, generateVerificationUrl } from '@/lib/credentialGenerator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,7 +45,11 @@ import {
   Trash2,
   FileText,
   FileImage,
-  Loader2
+  Loader2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen
 } from 'lucide-react';
 import { PAGE_SIZES } from '@/types/certificate';
 import { cn } from '@/lib/utils';
@@ -53,9 +59,13 @@ const fabric = ((fabricModule as any)?.fabric ?? fabricModule) as any;
 
 interface EditorToolbarProps {
   onOpenDataPanel: () => void;
+  showLeftPanel: boolean;
+  showRightPanel: boolean;
+  onToggleLeftPanel: () => void;
+  onToggleRightPanel: () => void;
 }
 
-export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
+export function EditorToolbar({ onOpenDataPanel, showLeftPanel, showRightPanel, onToggleLeftPanel, onToggleRightPanel }: EditorToolbarProps) {
   const { 
     template, 
     updateTemplate, 
@@ -93,10 +103,14 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
     });
   };
 
-  const handleExportSingle = useCallback(async (format: 'pdf' | 'png' | 'jpg') => {
+  const handleExportSingle = useCallback(async (format: 'pdf' | 'png' | 'jpg', withCredential = false) => {
     setIsExporting(true);
     
     try {
+      const credentialId = withCredential ? generateCredentialId() : null;
+      const currentDate = generateCurrentDate();
+      const baseUrl = window.location.origin;
+
       // Create a static canvas for export
       const canvas = new fabric.StaticCanvas(null, {
         width: template.width,
@@ -119,12 +133,38 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
       // Sort elements by zIndex
       const sortedElements = [...template.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 
+      // Collect text elements for PDF text layer
+      const textElements: Array<{
+        text: string;
+        x: number;
+        y: number;
+        fontSize: number;
+        fontFamily: string;
+        fontWeight: string;
+        fontStyle: string;
+        fill: string;
+        textAlign: string;
+        rotation: number;
+        opacity: number;
+      }> = [];
+
       // Add elements
       for (const element of sortedElements) {
+        let text = element.text || '';
+
+        // Replace auto-generated placeholders
+        if (element.type === 'placeholder' && element.placeholderKey) {
+          if (element.placeholderKey === 'Certificate_ID' && credentialId) {
+            text = credentialId;
+          } else if (element.placeholderKey === 'Date') {
+            text = currentDate;
+          }
+        }
+
         switch (element.type) {
           case 'text':
-          case 'placeholder':
-            const textObj = new fabric.IText(element.text || '', {
+          case 'placeholder': {
+            const textObj = new fabric.IText(text, {
               left: element.x,
               top: element.y,
               fontFamily: element.fontFamily || 'Inter',
@@ -138,79 +178,66 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
               charSpacing: (element.letterSpacing || 0) * 10,
             });
             canvas.add(textObj);
+            textElements.push({
+              text,
+              x: element.x,
+              y: element.y,
+              fontSize: element.fontSize || 24,
+              fontFamily: element.fontFamily || 'Inter',
+              fontWeight: element.fontWeight || 'normal',
+              fontStyle: element.fontStyle || 'normal',
+              fill: element.fill || '#000000',
+              textAlign: element.textAlign || 'left',
+              rotation: element.rotation || 0,
+              opacity: element.opacity ?? 1,
+            });
             break;
+          }
 
           case 'shape':
             if (element.shapeType === 'circle') {
-              const circle = new fabric.Circle({
-                left: element.x,
-                top: element.y,
+              canvas.add(new fabric.Circle({
+                left: element.x, top: element.y,
                 radius: Math.min(element.width || 100, element.height || 100) / 2,
-                fill: element.fill || '#e2e8f0',
-                stroke: element.stroke || '#94a3b8',
-                strokeWidth: element.strokeWidth || 1,
-                angle: element.rotation || 0,
+                fill: element.fill || '#e2e8f0', stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1, angle: element.rotation || 0,
                 opacity: element.opacity ?? 1,
-              });
-              canvas.add(circle);
+              }));
             } else if (element.shapeType === 'triangle') {
-              const triangle = new fabric.Triangle({
-                left: element.x,
-                top: element.y,
-                width: element.width || 100,
-                height: element.height || 100,
-                fill: element.fill || '#e2e8f0',
-                stroke: element.stroke || '#94a3b8',
-                strokeWidth: element.strokeWidth || 1,
-                angle: element.rotation || 0,
+              canvas.add(new fabric.Triangle({
+                left: element.x, top: element.y,
+                width: element.width || 100, height: element.height || 100,
+                fill: element.fill || '#e2e8f0', stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1, angle: element.rotation || 0,
                 opacity: element.opacity ?? 1,
-              });
-              canvas.add(triangle);
+              }));
             } else {
-              const rect = new fabric.Rect({
-                left: element.x,
-                top: element.y,
-                width: element.width || 100,
-                height: element.height || 100,
-                fill: element.fill || '#e2e8f0',
-                stroke: element.stroke || '#94a3b8',
-                strokeWidth: element.strokeWidth || 1,
-                rx: 4,
-                ry: 4,
-                angle: element.rotation || 0,
-                opacity: element.opacity ?? 1,
-              });
-              canvas.add(rect);
+              canvas.add(new fabric.Rect({
+                left: element.x, top: element.y,
+                width: element.width || 100, height: element.height || 100,
+                fill: element.fill || '#e2e8f0', stroke: element.stroke || '#94a3b8',
+                strokeWidth: element.strokeWidth || 1, rx: 4, ry: 4,
+                angle: element.rotation || 0, opacity: element.opacity ?? 1,
+              }));
             }
             break;
 
           case 'line':
-            const line = new fabric.Line([0, 0, element.width || 200, 0], {
-              left: element.x,
-              top: element.y,
-              stroke: element.fill || '#000000',
-              strokeWidth: element.strokeWidth || 2,
-              angle: element.rotation || 0,
-              opacity: element.opacity ?? 1,
-            });
-            canvas.add(line);
+            canvas.add(new fabric.Line([0, 0, element.width || 200, 0], {
+              left: element.x, top: element.y,
+              stroke: element.fill || '#000000', strokeWidth: element.strokeWidth || 2,
+              angle: element.rotation || 0, opacity: element.opacity ?? 1,
+            }));
             break;
 
           case 'image':
             if (element.src) {
               try {
                 const img = await loadFabricImage(element.src);
-                img.set({
-                  left: element.x,
-                  top: element.y,
-                  angle: element.rotation || 0,
-                  opacity: element.opacity ?? 1,
-                });
+                img.set({ left: element.x, top: element.y, angle: element.rotation || 0, opacity: element.opacity ?? 1 });
                 img.scaleToWidth(element.width || 200);
                 canvas.add(img);
-              } catch {
-                // Ignore image loading errors
-              }
+              } catch { /* ignore */ }
             }
             break;
         }
@@ -221,34 +248,55 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
       const filename = template.name.replace(/[<>:"/\\|?*]/g, '_') || 'certificate';
 
       if (format === 'pdf') {
-        const dataUrl = canvas.toDataURL({
-          format: 'png',
-          quality: 1,
-          multiplier: 2,
-        });
-
         const pdf = new jsPDF({
           orientation: template.width > template.height ? 'landscape' : 'portrait',
           unit: 'px',
           format: [template.width, template.height],
         });
 
+        // Add the canvas as background image
+        const dataUrl = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 2 });
         pdf.addImage(dataUrl, 'PNG', 0, 0, template.width, template.height);
+
+        // Overlay invisible selectable text layer
+        for (const te of textElements) {
+          const fontStyle = te.fontWeight === 'bold'
+            ? (te.fontStyle === 'italic' ? 'bolditalic' : 'bold')
+            : (te.fontStyle === 'italic' ? 'italic' : 'normal');
+          
+          pdf.setFont('helvetica', fontStyle);
+          pdf.setFontSize(te.fontSize);
+          pdf.setTextColor(0, 0, 0, 0); // Invisible text for selection
+          
+          pdf.text(te.text, te.x, te.y + te.fontSize * 0.8, {
+            angle: te.rotation,
+          });
+        }
+
         pdf.save(`${filename}.pdf`);
       } else {
         const dataUrl = canvas.toDataURL({
           format: format === 'jpg' ? 'jpeg' : 'png',
-          quality: 1,
-          multiplier: 2,
+          quality: 1, multiplier: 2,
         });
-        
-        // Convert data URL to blob and save
         const link = document.createElement('a');
         link.download = `${filename}.${format}`;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+      }
+
+      // Save to database if credential was generated
+      if (credentialId) {
+        try {
+          await supabase.from('certificates').insert({
+            credential_id: credentialId,
+            recipient_name: template.name || 'Single Export',
+            template_name: template.name,
+            qr_code_data: generateVerificationUrl(credentialId, baseUrl),
+          });
+        } catch { /* ignore db errors for single export */ }
       }
     } catch (error) {
       console.error('Export failed:', error);
@@ -569,6 +617,28 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
         </Button>
       </div>
 
+      {/* Panel Toggles */}
+      <div className="flex items-center gap-1">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={onToggleLeftPanel}
+          className="h-8 w-8"
+          title={showLeftPanel ? 'Hide Left Panel' : 'Show Left Panel'}
+        >
+          {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={onToggleRightPanel}
+          className="h-8 w-8"
+          title={showRightPanel ? 'Hide Right Panel' : 'Show Right Panel'}
+        >
+          {showRightPanel ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+        </Button>
+      </div>
+
       <div className="flex-1" />
 
       {/* Reset Button */}
@@ -625,42 +695,27 @@ export function EditorToolbar({ onOpenDataPanel }: EditorToolbarProps) {
             <div className="text-sm font-medium">Export Certificate</div>
             
             <div className="space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => handleExportSingle('pdf')}
-                disabled={isExporting}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Download as PDF
+              <p className="text-xs text-muted-foreground font-medium">Standard Export</p>
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleExportSingle('pdf')} disabled={isExporting}>
+                <FileText className="w-4 h-4 mr-2" /> PDF
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => handleExportSingle('png')}
-                disabled={isExporting}
-              >
-                <FileImage className="w-4 h-4 mr-2" />
-                Download as PNG
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleExportSingle('png')} disabled={isExporting}>
+                <FileImage className="w-4 h-4 mr-2" /> PNG
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => handleExportSingle('jpg')}
-                disabled={isExporting}
-              >
-                <FileImage className="w-4 h-4 mr-2" />
-                Download as JPG
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleExportSingle('jpg')} disabled={isExporting}>
+                <FileImage className="w-4 h-4 mr-2" /> JPG
               </Button>
             </div>
 
-            <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground">
-                For bulk generation with recipient data, use "Bulk Generate"
-              </p>
+            <div className="pt-2 border-t space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">With Credential ID</p>
+              <p className="text-[10px] text-muted-foreground">Auto-generates a unique ID, date, and saves for verification</p>
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleExportSingle('pdf', true)} disabled={isExporting}>
+                <FileText className="w-4 h-4 mr-2" /> PDF + Credential
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => handleExportSingle('png', true)} disabled={isExporting}>
+                <FileImage className="w-4 h-4 mr-2" /> PNG + Credential
+              </Button>
             </div>
           </div>
         </PopoverContent>
