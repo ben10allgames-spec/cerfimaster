@@ -35,7 +35,7 @@ import { CertificateTemplate } from '@/types/certificate';
 import { v4 as uuidv4 } from 'uuid';
 
 export function EditorSidebar() {
-  const { addElement, template, setTemplate } = useEditor();
+  const { addElement, template, setTemplate, updateTemplate } = useEditor();
   const [activeTab, setActiveTab] = useState('elements');
 
   const handleAddText = useCallback(() => {
@@ -195,15 +195,25 @@ export function EditorSidebar() {
     setTemplate(newTemplate);
   }, [setTemplate]);
 
+  const [customPlaceholderKey, setCustomPlaceholderKey] = useState('');
+
   const placeholders = [
     { key: 'Name', label: 'Recipient Name', icon: '👤' },
     { key: 'Course_Name', label: 'Course/Event Name', icon: '📚' },
-    { key: 'Date', label: 'Date', icon: '📅' },
+    { key: 'Date', label: 'Date (Auto)', icon: '📅' },
     { key: 'Organization_Name', label: 'Organization', icon: '🏢' },
-    { key: 'Certificate_ID', label: 'Certificate ID', icon: '🔢' },
+    { key: 'Certificate_ID', label: 'Certificate ID (Auto)', icon: '🔢' },
     { key: 'Email', label: 'Email Address', icon: '📧' },
     { key: 'Title', label: 'Title/Position', icon: '🎖️' },
+    { key: 'Description', label: 'Description', icon: '📝' },
   ];
+
+  const handleAddCustomPlaceholder = useCallback(() => {
+    if (!customPlaceholderKey.trim()) return;
+    const key = customPlaceholderKey.trim().replace(/\s+/g, '_');
+    handleAddPlaceholder(key);
+    setCustomPlaceholderKey('');
+  }, [customPlaceholderKey, handleAddPlaceholder]);
 
   const categoryIcons: Record<string, React.ElementType> = {
     professional: Building2,
@@ -220,6 +230,21 @@ export function EditorSidebar() {
     { name: 'Modern Blue', colors: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#0f172a', '#ffffff'] },
     { name: 'Royal Purple', colors: ['#6366f1', '#818cf8', '#a5b4fc', '#1e1b4b', '#ffffff'] },
     { name: 'Warm Earth', colors: ['#d97706', '#f59e0b', '#fcd34d', '#292524', '#fef7f0'] },
+    { name: 'Rose Gold', colors: ['#e11d48', '#fb7185', '#fecdd3', '#1c1917', '#fff1f2'] },
+    { name: 'Forest', colors: ['#065f46', '#059669', '#34d399', '#022c22', '#f0fdf4'] },
+  ];
+
+  const gradientPalettes = [
+    { name: 'Sunset', colors: ['#f97316', '#ef4444'], css: 'linear-gradient(135deg, #f97316, #ef4444)' },
+    { name: 'Ocean', colors: ['#0ea5e9', '#6366f1'], css: 'linear-gradient(135deg, #0ea5e9, #6366f1)' },
+    { name: 'Aurora', colors: ['#06b6d4', '#8b5cf6'], css: 'linear-gradient(135deg, #06b6d4, #8b5cf6)' },
+    { name: 'Peach', colors: ['#f59e0b', '#ec4899'], css: 'linear-gradient(135deg, #f59e0b, #ec4899)' },
+    { name: 'Mint', colors: ['#10b981', '#06b6d4'], css: 'linear-gradient(135deg, #10b981, #06b6d4)' },
+    { name: 'Midnight', colors: ['#1e293b', '#6366f1'], css: 'linear-gradient(135deg, #1e293b, #6366f1)' },
+    { name: 'Gold Shine', colors: ['#c9a227', '#f0d78c'], css: 'linear-gradient(135deg, #c9a227, #f0d78c)' },
+    { name: 'Royal', colors: ['#4c1d95', '#7c3aed'], css: 'linear-gradient(135deg, #4c1d95, #7c3aed)' },
+    { name: 'Emerald', colors: ['#065f46', '#10b981'], css: 'linear-gradient(135deg, #065f46, #10b981)' },
+    { name: 'Lavender', colors: ['#ede9fe', '#c4b5fd'], css: 'linear-gradient(135deg, #ede9fe, #c4b5fd)' },
   ];
 
   return (
@@ -515,6 +540,29 @@ export function EditorSidebar() {
                     </button>
                   ))}
                 </div>
+                {/* Custom placeholder input */}
+                <div className="flex gap-1 mt-2">
+                  <input
+                    type="text"
+                    value={customPlaceholderKey}
+                    onChange={(e) => setCustomPlaceholderKey(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddCustomPlaceholder()}
+                    placeholder="Custom field name..."
+                    className="flex-1 h-8 rounded-md bg-white/5 border border-white/10 text-editor-sidebar-foreground text-xs px-2"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAddCustomPlaceholder}
+                    disabled={!customPlaceholderKey.trim()}
+                    className="h-8 bg-white/5 border-white/10 text-editor-sidebar-foreground hover:bg-white/10 px-2"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
+                <p className="text-[10px] text-editor-sidebar-muted">
+                  Certificate_ID and Date are auto-generated
+                </p>
               </div>
             </div>
           </ScrollArea>
@@ -524,6 +572,33 @@ export function EditorSidebar() {
         <TabsContent value="styles" className="flex-1 overflow-hidden m-0">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-6">
+              {/* Gradient Palettes */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
+                  Gradient Palettes
+                </h3>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {gradientPalettes.map((gradient) => (
+                    <Tooltip key={gradient.name}>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            // Apply gradient as background - use first color
+                            updateTemplate({ backgroundColor: gradient.colors[0] });
+                          }}
+                          className="aspect-square rounded-md border border-white/10 hover:scale-110 transition-transform"
+                          style={{ background: gradient.css }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">{gradient.name}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+                <p className="text-[10px] text-editor-sidebar-muted">
+                  Click to apply as background color
+                </p>
+              </div>
+
               {/* Color Palettes */}
               <div className="space-y-3">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
@@ -534,20 +609,48 @@ export function EditorSidebar() {
                     <p className="text-xs text-editor-sidebar-foreground">{palette.name}</p>
                     <div className="flex gap-1">
                       {palette.colors.map((color, i) => (
-                        <button
-                          key={i}
-                          onClick={() => handleAddDecoShape(color, { width: 100, height: 100 })}
-                          className={cn(
-                            "flex-1 aspect-square rounded-md border border-white/10 hover:scale-110 transition-transform",
-                            color === '#ffffff' && "border-gray-300"
-                          )}
-                          style={{ backgroundColor: color }}
-                          title={color}
-                        />
+                        <Tooltip key={i}>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => handleAddDecoShape(color, { width: 100, height: 100 })}
+                              className={cn(
+                                "flex-1 aspect-square rounded-md border border-white/10 hover:scale-110 transition-transform",
+                                color === '#ffffff' && "border-gray-300"
+                              )}
+                              style={{ backgroundColor: color }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">{color}</TooltipContent>
+                        </Tooltip>
                       ))}
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Background Quick Set */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-editor-sidebar-muted">
+                  Background Colors
+                </h3>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {['#ffffff', '#f8fafc', '#fef7f0', '#f0f9ff', '#fdf4ff', '#1e293b', '#0f172a', '#fef3c7', '#ecfdf5', '#fce7f3'].map((color) => (
+                    <Tooltip key={color}>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => updateTemplate({ backgroundColor: color })}
+                          className={cn(
+                            "aspect-square rounded-md border transition-transform hover:scale-110",
+                            color === '#ffffff' ? 'border-gray-300' : 'border-white/20',
+                            template.backgroundColor === color && 'ring-2 ring-primary ring-offset-1'
+                          )}
+                          style={{ backgroundColor: color }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">{color}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
               </div>
 
               {/* Quick Decorations */}

@@ -508,12 +508,12 @@ export function PropertiesPanel() {
           <div>
             <Label className="text-[10px] text-editor-sidebar-muted">Quick Colors</Label>
             <div className="flex gap-1 mt-1 flex-wrap">
-              {['#000000', '#ffffff', '#1e293b', '#6366f1', '#c9a227', '#0ea5e9', '#d97706', '#ef4444', '#22c55e'].map((color) => (
+              {['#000000', '#ffffff', '#1e293b', '#6366f1', '#c9a227', '#0ea5e9', '#d97706', '#ef4444', '#22c55e', '#8b5cf6', '#ec4899', '#06b6d4'].map((color) => (
                 <button
                   key={color}
                   onClick={() => updateElement(element.id, { fill: color })}
                   className={cn(
-                    "w-6 h-6 rounded border",
+                    "w-6 h-6 rounded border transition-transform hover:scale-110",
                     color === '#ffffff' ? 'border-gray-300' : 'border-white/20',
                     element.fill === color && 'ring-2 ring-primary ring-offset-1 ring-offset-background'
                   )}
